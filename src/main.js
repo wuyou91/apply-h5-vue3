@@ -1,7 +1,8 @@
-import './assets/main.css'
+import './assets/main.less'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import 'vant/lib/index.css'; // 引入vant组件样式
 
 import App from './App.vue'
 import router from './router'
