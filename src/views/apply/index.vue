@@ -18,7 +18,7 @@ import { Icon } from 'vant'
                 </div>
             </div>
         </div>
-        <navTabs active="apply" />
+        <navTabs />
     </div>
 </template>
 

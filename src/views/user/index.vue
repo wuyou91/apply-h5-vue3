@@ -55,7 +55,7 @@ function clear() {
                 <Icon name="arrow" color="#898989" />
             </div>
         </div>
-        <navTabs active="user" />
+        <navTabs />
     </div>
 </template>
 

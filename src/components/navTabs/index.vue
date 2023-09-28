@@ -6,10 +6,10 @@ const props = defineProps({
 </script>
 
 <template>
-    <Tabbar v-model="props.active" fixed placeholder>
-        <TabbarItem name="home" icon="wap-home-o" to="/home">首页</TabbarItem>
-        <TabbarItem name="apply" icon="list-switching" to="apply">申报</TabbarItem>
-        <TabbarItem name="record" icon="orders-o" to="/record">订单</TabbarItem>
-        <TabbarItem name="user" icon="user-o" to="/user">我的</TabbarItem>
+    <Tabbar route fixed placeholder>
+        <TabbarItem icon="wap-home-o" to="/home">首页</TabbarItem>
+        <TabbarItem icon="list-switching" to="/apply">申报</TabbarItem>
+        <TabbarItem icon="orders-o" to="/record">订单</TabbarItem>
+        <TabbarItem icon="user-o" to="/user">我的</TabbarItem>
     </Tabbar>
 </template>

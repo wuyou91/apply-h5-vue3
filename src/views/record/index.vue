@@ -1,7 +1,7 @@
 <template>
     <div class="tab-page record">
         <div class="main"></div>
-        <navTabs active="record" />
+        <navTabs />
     </div>
 </template>
 

@@ -56,7 +56,7 @@ function setMarker(item) {
       </div>
     </div>
     <div id="map-container" class="main map-wrapper"></div>
-    <navTabs active="home" />
+    <navTabs />
   </div>
 </template>
 
