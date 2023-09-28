@@ -130,7 +130,7 @@ function clear() {
 
 .list {
     margin: 20px 15px;
-    .wraper-box();
+    .wrapper-box();
 
     .list-item {
         display: flex;
