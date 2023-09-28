@@ -1,38 +1,23 @@
 
 <script setup>
-import { onMounted, onBeforeUnmount } from 'vue'
-import AMapLoader from '@amap/amap-jsapi-loader';
+import useMap from '@/hoc/useMap';
+import {Icon} from 'vant'
+import navTabs from '@/components/navTabs/index.vue'
 
-let map = null
-
-onMounted(() => {
-  initMap()
-})
-onBeforeUnmount(() => {
-  map?.destroy()
-})
-function initMap() {
-  AMapLoader.load({
-    key: "fbc034c3ebbf5b36b4d926c73adbe92d",
-    version: "2.0", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-    plugins: [], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-  })
-    .then((AMap) => {
-      map = new AMap.Map("map-container", {
-        viewMode: "2D", // 是否为3D地图模式
-        zoom: 13, // 初始化地图级别
-        center: [114.060842,22.54459] // 初始化地图中心点位置
-      });
-    })
-    .catch((e) => {
-      console.log(e);
-    });
+const { map } = useMap('map-container')
+function getLocation() {
+  map.value.setCenter([114.060842, 22.54459], false, 150)
 }
 </script>
 
 <template>
   <div class="map-home">
+    <div class="toolWrapper">
+      <div class="tool"><Icon name="/svg/fold.svg" size="24" /></div>
+      <div class="tool" @click="getLocation"><Icon name="/svg/location.svg" size="24" /></div>
+    </div>
     <div id="map-container" class="map-wrapper"></div>
+    <navTabs active="home" />
   </div>
 </template>
 
@@ -40,10 +25,35 @@ function initMap() {
 .map-home {
   width: 100%;
   height: 100vh;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  .toolWrapper {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    right: 10px;
+    bottom: 80px;
+    z-index: 2;
+
+    .tool {
+      width: 32px;
+      height: 32px;
+      margin-top: 8px;
+      background: #fff;
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+    }
+  }
 
   .map-wrapper {
     width: 100%;
-    height: 100%;
+    height: 100px;
+    flex-grow: 1;
   }
 }
 </style>
