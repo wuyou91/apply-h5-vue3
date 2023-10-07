@@ -11,6 +11,14 @@ export default function useMap(id, config) {
                 zoom: 13,
                 center: [114.060842, 22.54459]
             });
+            const scale = new AMap.Scale({
+                visible: true,
+                position: {
+                    bottom: '20px',
+                    right: '65px'
+                }
+            })
+            map.value.addControl(scale)
         }
     })
     onUnmounted(() => {
