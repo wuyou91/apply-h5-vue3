@@ -6,7 +6,7 @@ const props = defineProps({
 </script>
 
 <template>
-    <Tabbar route fixed placeholder>
+    <Tabbar route fixed placeholder z-index="9999">
         <TabbarItem icon="wap-home-o" to="/home">首页</TabbarItem>
         <TabbarItem icon="list-switching" to="/apply">申报</TabbarItem>
         <TabbarItem icon="orders-o" to="/record">订单</TabbarItem>

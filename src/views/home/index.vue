@@ -1,27 +1,55 @@
 
 <script setup>
 import useMap from '@/hoc/useMap';
-import { Icon, Popup, Checkbox, CheckboxGroup, Space, showToast } from 'vant'
+import { Icon, Popup, Checkbox, CheckboxGroup, Space, showToast, FloatingPanel, showImagePreview, Empty  } from 'vant'
 import navTabs from '@/components/navTabs/index.vue'
 import placeSearch from '@/components/placeSearch/index.vue'
 import { ref } from 'vue'
 
-const { map } = useMap('map-container')
+const anchors = [
+  240,
+  Math.round(0.6 * window.innerHeight),
+];
+const { map } = useMap('map-container', null, (e) => {
+  getLocation(e.lnglat)
+})
 
 const showPopup = ref(false)
 const checked = ref([])
 const mapType = ref('2d')
+const positionDetail = ref(null)
+
+const geocoder = new AMap.Geocoder({
+    city: '全国', // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+    extensions: 'all'
+  })
 
 let marker = null
 
-function getLocation() {
-  marker && map.value.remove(marker)
-  map.value.setCenter([114.060842, 22.54459], true)
+function getLocation(lngLat) {
+  console.log(map.value)
+  map.value.setCenter(lngLat, true)
+  geocoder.getAddress(lngLat, function(status, result) {
+    if (status === 'complete' && result.info === 'OK') {
+        // result为对应的地理位置详细信息
+        console.log(result.regeocode)
+        const poi = {
+          ...result.regeocode.pois[0],
+          address: result.regeocode.formattedAddress
+        }
+        positionDetail.value = poi
+        setMarker({
+          ...poi,
+          location: lngLat
+        })
+    }
+  })
 };
 
 function selectPlace(val) {
   setMarker(val)
   map.value.setCenter(val.location, true)
+  positionDetail.value = val
 };
 
 function setMarker(item) {
@@ -52,20 +80,28 @@ function change(e) {
   const str = e.join()
   showToast('已选择：' + str)
 }
+
+function showBigImg(index) {
+  const images = positionDetail.value.photos.map(item => item.url)
+  showImagePreview({
+    images,
+    startPosition: index
+  })
+}
 </script>
 
 <template>
-  <div class="tab-page map-home">
+  <div class="map-home">
     <Popup v-model:show="showPopup" position="right" :lazy-render=false>
       <div class="popup-box">
         <div class="area">
           <div class="title">地图类型</div>
           <div class="contain fl">
-            <div class="item" :class="{active : mapType === '2d'}" @click="() => mapType ='2d'">
+            <div class="item" :class="{ active: mapType === '2d' }" @click="() => mapType = '2d'">
               <img src="/img/legend_mapType.png" alt="">
               <p>2d</p>
             </div>
-            <div class="item" :class="{active : mapType === '3d'}" @click="() => mapType ='3d'">
+            <div class="item" :class="{ active: mapType === '3d' }" @click="() => mapType = '3d'">
               <img src="/img/legend_mapType.png" alt="">
               <p>3d</p>
             </div>
@@ -89,16 +125,34 @@ function change(e) {
     <div class="search">
       <placeSearch @selectPlace="selectPlace" />
     </div>
-    <div id="map-container" class="main map-wrapper">
+    <div id="map-container" class="map-wrapper">
       <div class="toolWrapper">
-        <div class="tool"  @click="() => showPopup = true">
+        <div class="tool" @click="() => showPopup = true">
           <Icon name="/svg/fold.svg" size="24" />
         </div>
-        <div class="tool" @click="getLocation">
+        <div class="tool" @click="getLocation([114.060842, 22.54459])">
           <Icon name="/svg/location.svg" size="24" />
         </div>
       </div>
     </div>
+    <FloatingPanel :anchors="anchors">
+      <div class="position-detail" v-if="positionDetail">
+        <div class="text">
+          <div class="name">{{ positionDetail.name }}</div>
+          <div class="type">{{ positionDetail.type }}</div>
+          <div class="addr">{{ (positionDetail.cityname || '') + (positionDetail.adname || '') + positionDetail.address }}
+          </div>
+          <div class="type" v-show="positionDetail.tel">{{ positionDetail.tel }}</div>
+        </div>
+        <div class="photos" v-show="positionDetail.photos?.length">
+          <img :src="item.url" alt="" v-for="(item, index) in positionDetail.photos" @click="showBigImg(index)">
+        </div>
+      </div>
+      <div v-else>
+        <Empty description="暂无数据" />
+      </div>
+      <div class="van-safe-area-bottom"></div>
+    </FloatingPanel>
     <navTabs />
   </div>
 </template>
@@ -118,7 +172,7 @@ function change(e) {
   .map-wrapper {
     position: relative;
     width: 100%;
-    height: 100px;
+    height: calc(100vh - 230px)
   }
 
   .toolWrapper {
@@ -162,27 +216,58 @@ function change(e) {
     .contain {
       padding: 0 12px;
     }
-    .fl{
+
+    .fl {
       display: flex;
-      .item{
+
+      .item {
         margin-top: 10px;
         margin-right: 10px;
-        img{
+
+        img {
           width: 80px;
           display: block;
           box-sizing: border-box;
           border-radius: 6px;
         }
-        p{
+
+        p {
           text-align: center;
         }
       }
-      .active{
-        img{
+
+      .active {
+        img {
           border: 1px solid #313131;
         }
       }
     }
   }
 }
-</style>
+
+.position-detail {
+  padding: 10px 15px 60px;
+.text{
+  margin-bottom: 10px;
+  font-size: 14px;
+  color: #999;
+  .name {
+    color: #313131;
+    font-size: 16px;
+    font-weight: bold;
+  }
+}
+
+  .photos {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -10px;
+
+    img {
+      width: 120px;
+      margin-right: 10px;
+      margin-bottom: 10px;
+    }
+  }
+}</style>
