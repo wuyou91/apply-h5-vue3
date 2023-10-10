@@ -1,7 +1,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import AMapLoader from '@amap/amap-jsapi-loader';
 
-export default function useMap(id, config) {
+export default function useMap(id, config, onclick) {
     const map = ref(null)
 
     onMounted(() => {
@@ -11,6 +11,9 @@ export default function useMap(id, config) {
                 zoom: 13,
                 center: [114.060842, 22.54459]
             });
+            map.value.on('click', e => {
+                onclick && onclick(e)
+            })
             const scale = new AMap.Scale({
                 visible: true,
                 position: {
