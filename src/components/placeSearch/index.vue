@@ -16,7 +16,8 @@ const placeSearch = new AMap.PlaceSearch({
     pageSize: 20, // 单页显示结果条数
     pageIndex: 1, // 页码
     city: "深圳", // 兴趣点城市
-    citylimit: true  //是否强制限制在设置的城市内搜索
+    citylimit: true,  //是否强制限制在设置的城市内搜索
+    extensions: 'all'
 })
 
 const valueChange = debounce((val) => {
