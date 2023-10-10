@@ -1,7 +1,7 @@
 
 <script setup>
 import useMap from '@/hoc/useMap';
-import { Icon, Popup, Checkbox, CheckboxGroup, Space, showToast, FloatingPanel, showImagePreview, Empty  } from 'vant'
+import { Icon, Popup, Checkbox, CheckboxGroup, Space, showToast, FloatingPanel, showImagePreview, Empty, Loading } from 'vant'
 import navTabs from '@/components/navTabs/index.vue'
 import placeSearch from '@/components/placeSearch/index.vue'
 import { ref } from 'vue'
@@ -18,30 +18,43 @@ const showPopup = ref(false)
 const checked = ref([])
 const mapType = ref('2d')
 const positionDetail = ref(null)
+const showLoading = ref(false)
 
 const geocoder = new AMap.Geocoder({
-    city: '全国', // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
-    extensions: 'all'
-  })
+  city: '全国', // city 指定进行编码查询的城市，支持传入城市名、adcode 和 citycode
+  extensions: 'all'
+})
+const geolocation = new AMap.Geolocation()
 
 let marker = null
 
+function getPosition() {
+  showLoading.value = true
+  geolocation.getCurrentPosition(function (status, result) {
+    showLoading.value = false
+    if (status == 'complete') {
+      getLocation(result.position)
+    } else {
+      getLocation([114.060842, 22.54459])
+    }
+  })
+}
 function getLocation(lngLat) {
   console.log(map.value)
   map.value.setCenter(lngLat, true)
-  geocoder.getAddress(lngLat, function(status, result) {
+  geocoder.getAddress(lngLat, function (status, result) {
     if (status === 'complete' && result.info === 'OK') {
-        // result为对应的地理位置详细信息
-        console.log(result.regeocode)
-        const poi = {
-          ...result.regeocode.pois[0],
-          address: result.regeocode.formattedAddress
-        }
-        positionDetail.value = poi
-        setMarker({
-          ...poi,
-          location: lngLat
-        })
+      // result为对应的地理位置详细信息
+      console.log(result.regeocode)
+      const poi = {
+        ...result.regeocode.pois[0],
+        address: result.regeocode.formattedAddress
+      }
+      positionDetail.value = poi
+      setMarker({
+        ...poi,
+        location: lngLat
+      })
     }
   })
 };
@@ -126,11 +139,14 @@ function showBigImg(index) {
       <placeSearch @selectPlace="selectPlace" />
     </div>
     <div id="map-container" class="map-wrapper">
+      <div class="loading" v-show="showLoading">
+        <Loading color="#1989fa" vertical>加载中...</Loading>
+      </div>
       <div class="toolWrapper">
         <div class="tool" @click="() => showPopup = true">
           <Icon name="/svg/fold.svg" size="24" />
         </div>
-        <div class="tool" @click="getLocation([114.060842, 22.54459])">
+        <div class="tool" @click="getPosition()">
           <Icon name="/svg/location.svg" size="24" />
         </div>
       </div>
@@ -172,7 +188,17 @@ function showBigImg(index) {
   .map-wrapper {
     position: relative;
     width: 100%;
-    height: calc(100vh - 230px)
+    height: calc(100vh - 230px);
+
+    .loading {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
 
   .toolWrapper {
@@ -247,16 +273,18 @@ function showBigImg(index) {
 
 .position-detail {
   padding: 10px 15px 60px;
-.text{
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #999;
-  .name {
-    color: #313131;
-    font-size: 16px;
-    font-weight: bold;
+
+  .text {
+    margin-bottom: 10px;
+    font-size: 14px;
+    color: #999;
+
+    .name {
+      color: #313131;
+      font-size: 16px;
+      font-weight: bold;
+    }
   }
-}
 
   .photos {
     width: 100%;
@@ -270,4 +298,5 @@ function showBigImg(index) {
       margin-bottom: 10px;
     }
   }
-}</style>
+}
+</style>
